@@ -41,9 +41,9 @@ together, it makes my TV act like any regular computer monitor.
 - Set up a static IP address for the TV, either by assigning it a static DHCP
   lease, or by setting a static IP address in the TV's network settings.
 
-Then install the program with `cargo install --path .`. This programs seems to
-link to a bunch of dynamic libraries. You'll find out when building 🙂. Just
-install the relevant `-dev` or `-devel` packages or whatever.
+Then install the program with `cargo install --path .`. It seems to link to a
+bunch of dynamic libraries. You'll find out when building 🙂. Just install the
+relevant `-dev` or `-devel` packages or whatever.
 
 Look at the comments in [the systemd unit file](./tv-power.service) for
 information on how to set this up as a systemd service.

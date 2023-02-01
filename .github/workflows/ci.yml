@@ -33,7 +33,9 @@ jobs:
       - uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: nightly
-      - run: cargo install --locked cargo-deny@0.13.7 cargo-udeps@0.1.35
+      - run: |
+          cargo install --locked cargo-deny@0.13.7 || true
+          cargo install --locked cargo-udeps@0.1.35 || true
       - run: cargo fmt --check
       - run: cargo clippy -- -D warnings
       - run: cargo build --verbose

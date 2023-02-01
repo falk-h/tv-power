@@ -14,3 +14,8 @@ wol-rs = "1.0.0"
 
 [build-dependencies]
 dbus-codegen = { version = "0.10.0", default-features = false }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

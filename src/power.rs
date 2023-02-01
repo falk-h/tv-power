@@ -59,6 +59,14 @@ impl PowerManager {
                         eprintln!("Failed to turn TV {onoff}: {e}");
                     }
 
+                    // Don't retry powering off the TV, since it doesn't seem
+                    // flaky. In fact, retrying seems to cause a full shutdown
+                    // sometimes, instead of just putting the TV into standby
+                    // mode.
+                    if !power_on {
+                        continue;
+                    }
+
                     if let Ok(on) = ping_tv(addr.ip()) {
                         if on == power_on {
                             eprintln!("Turned TV {onoff}");

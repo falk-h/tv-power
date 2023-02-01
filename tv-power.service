@@ -41,7 +41,7 @@ After=network.target
 Wants=network.target
 
 [Service]
-Type=simple
+Type=notify
 Restart=always
 ExecStart=%h/.cargo/bin/tv-power service ${MAC} ${ADDR}
 

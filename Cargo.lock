@@ -876,6 +876,7 @@ dependencies = [
  "dbus",
  "dbus-codegen",
  "env_logger",
+ "libsystemd",
  "log",
  "mac_address",
  "systemd-journal-logger",

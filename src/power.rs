@@ -11,6 +11,7 @@ use color_eyre::{
 };
 use crossbeam::channel::Sender;
 use dbus::blocking::LocalConnection;
+use libsystemd::daemon::{self, NotifyState};
 use mac_address::MacAddress;
 
 use crate::presence::{generated::SessionManagerPresence, PresenceStatus};
@@ -46,7 +47,9 @@ impl PowerManager {
                 last_active = power_on;
 
                 let onoff = if power_on { "on" } else { "off" };
-                log::info!("Turning TV {onoff}");
+                let status = format!("Turning TV {onoff}");
+                log::info!("{}", status);
+                daemon::notify(false, &[NotifyState::Status(status)]).ok();
 
                 while receiver.is_empty() {
                     let result = if power_on {
@@ -57,6 +60,11 @@ impl PowerManager {
 
                     if let Err(e) = result {
                         log::error!("Failed to turn TV {onoff}: {e}");
+                        daemon::notify(
+                            false,
+                            &[NotifyState::Status(format!("Retrying TV power-{onoff}"))],
+                        )
+                        .ok();
                     }
 
                     // Don't retry powering off the TV, since it doesn't seem
@@ -77,6 +85,8 @@ impl PowerManager {
                         thread::sleep(Duration::from_millis(delay));
                     }
                 }
+
+                daemon::notify(false, &[NotifyState::Status("Idle".to_owned())]).ok();
             }
         });
         Ok(Self { sender })

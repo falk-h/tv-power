@@ -3,6 +3,7 @@ use std::{io::Write, net::SocketAddr, time::Duration};
 use clap::Parser;
 use color_eyre::Result;
 use dbus::{blocking::LocalConnection, message::SignalArgs};
+use libsystemd::daemon::{self, NotifyState};
 use log::Level;
 use mac_address::MacAddress;
 
@@ -79,6 +80,10 @@ fn service(mac: MacAddress, addr: SocketAddr) -> Result<()> {
         },
     )?;
 
+    daemon::notify(
+        false,
+        &[NotifyState::Ready, NotifyState::Status("Idle".to_owned())],
+    )?;
     log::info!("Listening to DBUS messages");
     loop {
         dbus.process(Duration::MAX)?;

@@ -20,11 +20,7 @@ pub struct PowerManager {
 }
 
 impl PowerManager {
-    pub fn new(
-        mac: MacAddress,
-        addr: SocketAddr,
-        dbus: &LocalConnection,
-    ) -> Result<Self> {
+    pub fn new(mac: MacAddress, addr: SocketAddr, dbus: &LocalConnection) -> Result<Self> {
         let proxy = dbus.with_proxy(
             "org.gnome.SessionManager",
             "/org/gnome/SessionManager/Presence",

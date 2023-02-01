@@ -22,7 +22,7 @@
 #
 # and adding a section that looks like this:
 #
-#     [Unit]
+#     [Service]
 #     Environment=ADDR=192.168.x.y:5555 MAC=C0:E7:BF:XX:YY:ZZ
 #
 # Replace the placeholder addresses with your TV's addresses.
@@ -40,13 +40,13 @@ Description=Turns the TV on/off when appropriate
 After=network.target
 Wants=network.target
 
-# These should be overriden. See the big comment above.
-Environment=ADDR=192.168.x.y:5555 MAC=C0:E7:BF:XX:YY:ZZ
-
 [Service]
 Type=simple
 Restart=always
 ExecStart=%h/.cargo/bin/tv-power service ${MAC} ${ADDR}
+
+# These should be overriden. See the big comment above.
+Environment=ADDR=192.168.x.y:5555 MAC=C0:E7:BF:XX:YY:ZZ
 
 [Install]
 WantedBy=graphical-session.target

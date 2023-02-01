@@ -48,6 +48,14 @@ relevant `-dev` or `-devel` packages or whatever.
 Look at the comments in [the systemd unit file](./tv-power.service) for
 information on how to set this up as a systemd service.
 
+## TODO
+
+- React to `org.gnome.ScreenSaver` messages instead of
+  `org.gnome.SessionManager.Presence` when turning off the TV, since this
+  currently shuts off the TV as soon as the screensaver starts to dim the
+  display.
+- More logging.
+
 [cec]: https://en.wikipedia.org/wiki/Consumer_Electronics_Control
 [nvidia]: https://forums.developer.nvidia.com/t/hdmi-cec-support/31445
 [tv]: https://www.mi.com/global/product/mi-tv-p1-55/

@@ -9,13 +9,7 @@ clap = { version = "4.1.4", features = ["derive", "env"] }
 color-eyre = "0.6.2"
 crossbeam = { version = "0.8.2", features = ["crossbeam-channel"] }
 dbus = "0.9.7"
-dbus-tree = "0.9.2"
-humantime = "2.1.0"
 mac_address = "1.1.4"
-nix = { version = "0.26.2", default-features = false, features = [
-    "pthread",
-    "signal",
-] }
 wol-rs = "1.0.0"
 
 [build-dependencies]

@@ -32,7 +32,7 @@ impl PowerManager {
             .context("Failed to get initial presence status over DBUS")?;
         let last_status = PresenceStatus::try_from(last_status)
             .context("Failed to parse initial presence status")?;
-        eprintln!("Got initial presence status {last_status:?}");
+        log::debug!("Got initial presence status {last_status:?}");
 
         let last_active = last_status.is_active();
         let (sender, receiver) = crossbeam::channel::unbounded();
@@ -46,7 +46,7 @@ impl PowerManager {
                 last_active = power_on;
 
                 let onoff = if power_on { "on" } else { "off" };
-                eprintln!("Turning TV {onoff}");
+                log::info!("Turning TV {onoff}");
 
                 while receiver.is_empty() {
                     let result = if power_on {
@@ -56,7 +56,7 @@ impl PowerManager {
                     };
 
                     if let Err(e) = result {
-                        eprintln!("Failed to turn TV {onoff}: {e}");
+                        log::error!("Failed to turn TV {onoff}: {e}");
                     }
 
                     // Don't retry powering off the TV, since it doesn't seem
@@ -69,11 +69,11 @@ impl PowerManager {
 
                     if let Ok(on) = ping_tv(addr.ip()) {
                         if on == power_on {
-                            eprintln!("Turned TV {onoff}");
+                            log::info!("Turned TV {onoff}");
                             break;
                         }
                         let delay = 200;
-                        eprintln!("TV is not yet on, retrying in {delay}ms");
+                        log::warn!("TV is not yet on, retrying in {delay}ms");
                         thread::sleep(Duration::from_millis(delay));
                     }
                 }

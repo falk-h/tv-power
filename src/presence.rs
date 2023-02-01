@@ -3,7 +3,7 @@ use std::{
     fmt::{self, Display, Formatter},
 };
 
-#[allow(dead_code)]
+#[allow(dead_code, clippy::needless_borrow)]
 pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 }

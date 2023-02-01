@@ -1,0 +1,52 @@
+# Systemd unit for the TV power service.
+#
+# Put this unit file somewhere where systemd can find it. For example:
+#
+#     mkdir -p ~/.config/systemd/user
+#     ln -s $(realpath tv-power.service) ~/.config/systemd/user/
+#
+# or, if you don't want to keep this repo around:
+#
+#     mkdir -p ~/.config/systemd/user
+#     cp tv-power.service ~/.config/systemd/user/
+#
+# Reload systemd unit files with
+#
+#     systemctl --user daemon-reload`
+#
+# Then you'll want to find your TV's IP and MAC addresses. You can find probably
+# these in the TV's settings or in your router's web interface. Then create a
+# systemd drop-in file by running
+#
+#     systemctl --user edit tv-power.service
+#
+# and adding a section that looks like this:
+#
+#     [Unit]
+#     Environment=ADDR=192.168.x.y:5555 MAC=C0:E7:BF:XX:YY:ZZ
+#
+# Replace the placeholder addresses with your TV's addresses.
+#
+# You can then start the service with
+#
+#     systemctl --user start tv-power.service
+#
+# To start it automatically at login, run
+#
+#     systemctl --user enable tv-power.service
+
+[Unit]
+Description=Turns the TV on/off when appropriate
+After=network.target
+Wants=network.target
+
+# These should be overriden. See the big comment above.
+Environment=ADDR=192.168.x.y:5555 MAC=C0:E7:BF:XX:YY:ZZ
+
+[Service]
+Type=simple
+Restart=always
+ExecStart=%h/.cargo/bin/tv-power service ${MAC} ${ADDR}
+
+[Install]
+WantedBy=graphical-session.target

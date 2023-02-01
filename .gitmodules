@@ -1,0 +1,3 @@
+[submodule "gnome-session"]
+	path = gnome-session
+	url = https://gitlab.gnome.org/GNOME/gnome-session.git

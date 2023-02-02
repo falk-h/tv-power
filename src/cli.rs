@@ -33,5 +33,14 @@ pub enum Command {
         /// The port should usually be 5555.
         #[arg(env)]
         addr: SocketAddr,
+
+        /// Which graphics output to watch to see if the TV is on.
+        ///
+        /// You can list available outputs with the list-outputs command.
+        #[arg(short, long, env)]
+        output: Option<String>,
     },
+
+    /// List video outputs.
+    ListOutputs {},
 }

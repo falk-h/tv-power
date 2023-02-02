@@ -1,5 +1,5 @@
 use std::{
-    net::{IpAddr, SocketAddr},
+    net::SocketAddr,
     process::{Command, Stdio},
     thread,
     time::Duration,
@@ -14,14 +14,22 @@ use dbus::blocking::LocalConnection;
 use libsystemd::daemon::{self, NotifyState};
 use mac_address::MacAddress;
 
-use crate::presence::{generated::SessionManagerPresence, PresenceStatus};
+use crate::{
+    outputs,
+    presence::{generated::SessionManagerPresence, PresenceStatus},
+};
 
 pub struct PowerManager {
     sender: Sender<bool>,
 }
 
 impl PowerManager {
-    pub fn new(mac: MacAddress, addr: SocketAddr, dbus: &LocalConnection) -> Result<Self> {
+    pub fn new(
+        mac: MacAddress,
+        addr: SocketAddr,
+        dbus: &LocalConnection,
+        output: Option<String>,
+    ) -> Result<Self> {
         let proxy = dbus.with_proxy(
             "org.gnome.SessionManager",
             "/org/gnome/SessionManager/Presence",
@@ -35,6 +43,7 @@ impl PowerManager {
             .context("Failed to parse initial presence status")?;
         log::debug!("Got initial presence status {last_status:?}");
 
+        let output = find_output(output).context("Failed to find graphical output")?;
         let last_active = last_status.is_active();
         let (sender, receiver) = crossbeam::channel::unbounded();
         thread::spawn(move || {
@@ -67,21 +76,13 @@ impl PowerManager {
                         .ok();
                     }
 
-                    // Don't retry powering off the TV, since it doesn't seem
-                    // flaky. In fact, retrying seems to cause a full shutdown
-                    // sometimes, instead of just putting the TV into standby
-                    // mode.
-                    if !power_on {
-                        continue;
-                    }
-
-                    if let Ok(on) = ping_tv(addr.ip()) {
+                    if let Ok(on) = outputs::is_connected(&output) {
                         if on == power_on {
                             log::info!("Turned TV {onoff}");
                             break;
                         }
                         let delay = 200;
-                        log::warn!("TV is not yet on, retrying in {delay}ms");
+                        log::warn!("TV is not yet {onoff}, retrying in {delay}ms");
                         thread::sleep(Duration::from_millis(delay));
                     }
                 }
@@ -97,17 +98,6 @@ impl PowerManager {
             .send(power_on)
             .expect("Failed to send message to worker thread. Did it die?")
     }
-}
-
-pub fn ping_tv(addr: IpAddr) -> Result<bool> {
-    // Send one ping with a 200ms timeout.
-    let status = Command::new("ping")
-        .args(["-q", "-c", "1", "-W", "0.2"])
-        .arg(addr.to_string())
-        .stdout(Stdio::null())
-        .status()
-        .context("Failed to invoke ping")?;
-    Ok(status.success())
 }
 
 pub fn turn_on(mac: MacAddress) -> Result<()> {
@@ -144,4 +134,22 @@ pub fn turn_off(addr: SocketAddr) -> Result<()> {
     );
 
     Ok(())
+}
+
+fn find_output(output: Option<String>) -> Result<String> {
+    if let Some(output) = output {
+        eyre::ensure!(outputs::exists(&output)?, "Output {output} doesn't exist");
+        return Ok(output);
+    }
+
+    match &*outputs::connected()?.collect::<Vec<_>>() {
+        [] => eyre::bail!("You haven't specified an output and no outputs are connected"),
+        [output] => {
+            log::info!("Using output {}", output.name);
+            Ok(output.name.clone())
+        }
+        _ => {
+            eyre::bail!("You haven't specified an output but there are multiple connected outputs")
+        }
+    }
 }

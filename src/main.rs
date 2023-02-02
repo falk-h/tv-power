@@ -12,6 +12,7 @@ use power::PowerManager;
 use presence::{generated::SessionManagerPresenceStatusChanged, PresenceStatus};
 
 mod cli;
+mod outputs;
 mod power;
 mod presence;
 
@@ -19,10 +20,12 @@ fn main() -> Result<()> {
     init_logging()?;
 
     let cmd = Command::parse();
+    use Command::*;
     match cmd {
-        Command::On { mac } => power::turn_on(mac),
-        Command::Off { addr } => power::turn_off(addr),
-        Command::Service { mac, addr } => service(mac, addr),
+        On { mac } => power::turn_on(mac),
+        Off { addr } => power::turn_off(addr),
+        Service { mac, addr, output } => service(mac, addr, output),
+        ListOutputs {} => outputs::list(),
     }
 }
 
@@ -59,9 +62,9 @@ fn init_logging() -> Result<()> {
     Ok(())
 }
 
-fn service(mac: MacAddress, addr: SocketAddr) -> Result<()> {
+fn service(mac: MacAddress, addr: SocketAddr, output: Option<String>) -> Result<()> {
     let dbus = LocalConnection::new_session()?;
-    let power_manager = PowerManager::new(mac, addr, &dbus)?;
+    let power_manager = PowerManager::new(mac, addr, &dbus, output)?;
     let match_rule = SessionManagerPresenceStatusChanged::match_rule(None, None);
 
     dbus.add_match(

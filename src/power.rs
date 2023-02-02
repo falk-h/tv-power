@@ -15,7 +15,7 @@ use libsystemd::daemon::{self, NotifyState};
 use mac_address::MacAddress;
 
 use crate::{
-    outputs,
+    adb, outputs,
     presence::{generated::SessionManagerPresence, PresenceStatus},
 };
 
@@ -111,29 +111,7 @@ pub fn turn_on(mac: MacAddress) -> Result<()> {
 }
 
 pub fn turn_off(addr: SocketAddr) -> Result<()> {
-    // Make sure we're connected to the TV.
-    let status = Command::new("adb")
-        .arg("connect")
-        .arg(addr.to_string())
-        .stdout(Stdio::null())
-        .status()
-        .context("Failed to invoke ADB")?;
-    eyre::ensure!(status.success(), "Connecting to {addr} over ADB failed");
-
-    // Then send a keyevent to the TV to turn it off. 26 corresponds to the
-    // power button.
-    let status = Command::new("adb")
-        .arg("-s")
-        .arg(addr.to_string())
-        .args(["shell", "input", "keyevent", "26"])
-        .status()
-        .context("Failed to invoke ADB")?;
-    eyre::ensure!(
-        status.success(),
-        "Sending keyevent to {addr} over ADB failed",
-    );
-
-    Ok(())
+    adb::send_keycode(addr, 26)
 }
 
 fn find_output(output: Option<String>) -> Result<String> {

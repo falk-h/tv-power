@@ -43,4 +43,15 @@ pub enum Command {
 
     /// List video outputs.
     ListOutputs {},
+
+    Keycodes {
+        /// The TV's IP address and ADB port.
+        ///
+        /// The port should usually be 5555.
+        #[arg(env)]
+        addr: SocketAddr,
+
+        /// Keycodes to send.
+        keycodes: Vec<i32>,
+    },
 }

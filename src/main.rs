@@ -11,6 +11,7 @@ use cli::Command;
 use power::PowerManager;
 use presence::{generated::SessionManagerPresenceStatusChanged, PresenceStatus};
 
+mod adb;
 mod cli;
 mod outputs;
 mod power;
@@ -26,6 +27,7 @@ fn main() -> Result<()> {
         Off { addr } => power::turn_off(addr),
         Service { mac, addr, output } => service(mac, addr, output),
         ListOutputs {} => outputs::list(),
+        Keycodes { addr, keycodes } => adb::send_keycodes(addr, keycodes),
     }
 }
 

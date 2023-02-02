@@ -23,9 +23,11 @@
 # and adding a section that looks like this:
 #
 #     [Service]
-#     Environment=ADDR=192.168.x.y:5555 MAC=C0:E7:BF:XX:YY:ZZ
+#     Environment=IP=192.168.x.y MAC=C0:E7:BF:XX:YY:ZZ
 #
-# Replace the placeholder addresses with your TV's addresses.
+# Replace the placeholder addresses with your TV's addresses. You can also
+# specify PORT=1234 if the TV is running adb on an alternate port for whatever
+# reason.
 #
 # You can then start the service with
 #
@@ -46,7 +48,7 @@ Restart=always
 ExecStart=%h/.cargo/bin/tv-power service ${MAC} ${ADDR}
 
 # These should be overriden. See the big comment above.
-Environment=ADDR=192.168.x.y:5555 MAC=C0:E7:BF:XX:YY:ZZ
+Environment=ADDR=192.168.x.y MAC=C0:E7:BF:XX:YY:ZZ
 
 [Install]
 WantedBy=graphical-session.target

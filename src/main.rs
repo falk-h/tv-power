@@ -23,11 +23,15 @@ fn main() -> Result<()> {
     let cmd = Command::parse();
     use Command::*;
     match cmd {
-        On { mac } => power::turn_on(mac),
-        Off { addr } => power::turn_off(addr),
-        Service { mac, addr, output } => service(mac, addr, output),
+        On { mac, sockaddr } => power::turn_on(sockaddr.to_std(), mac.mac),
+        Off { sockaddr } => power::turn_off(sockaddr.to_std()),
+        Service {
+            mac,
+            sockaddr,
+            output,
+        } => service(mac.mac, sockaddr.to_std(), output),
         ListOutputs {} => outputs::list(),
-        Keycodes { addr, keycodes } => adb::send_keycodes(addr, keycodes),
+        Keycodes { sockaddr, keycodes } => adb::send_keycodes(sockaddr.to_std(), keycodes, None),
     }
 }
 

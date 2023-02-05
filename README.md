@@ -45,6 +45,31 @@ Then install the program with `cargo install --path .`. It seems to link to a
 bunch of dynamic libraries. You'll find out when building 🙂. Just install the
 relevant `-dev` or `-devel` packages or whatever.
 
+Then you'll want to create a configuration file in
+`$XDG_CONFIG_DIR/tv-power/tv-power.conf`. Usually this will be
+`~/.config/tv-power/tv-power.conf`. The possible configuration options are the
+same as the environment variables accepted by the program (see the `--help`
+output for the different subcommands), but case-insensitive. Here's an example
+file:
+
+```bash
+# Required: The IP address of the TV.
+ip = 192.168.x.y
+
+# Required: The MAC address of the TV.
+mac = C0:E7:BF:XX:YY:ZZ
+
+# Optional: The port to use when connecting to the TV via adb. This should be
+# 5555 if you haven't changed it, which is also the default.
+port = 5555
+
+# Optional: The HDMI output that the TV is connected to. This option is only
+# required if you have multiple outputs connected to your PC. If you only have
+# one output connected, that output will be used by default. You can list
+# possible values by running `tv-power list-outputs`.
+output = card0-HDMI-A-1
+```
+
 Look at the comments in [the systemd unit file](./tv-power.service) for
 information on how to set this up as a systemd service.
 

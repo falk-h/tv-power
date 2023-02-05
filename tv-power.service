@@ -14,21 +14,6 @@
 #
 #     systemctl --user daemon-reload`
 #
-# Then you'll want to find your TV's IP and MAC addresses. You can find probably
-# these in the TV's settings or in your router's web interface. Then create a
-# systemd drop-in file by running
-#
-#     systemctl --user edit tv-power.service
-#
-# and adding a section that looks like this:
-#
-#     [Service]
-#     Environment=IP=192.168.x.y MAC=C0:E7:BF:XX:YY:ZZ
-#
-# Replace the placeholder addresses with your TV's addresses. You can also
-# specify PORT=1234 if the TV is running adb on an alternate port for whatever
-# reason.
-#
 # You can then start the service with
 #
 #     systemctl --user start tv-power.service
@@ -45,10 +30,7 @@ Wants=network.target
 [Service]
 Type=notify
 Restart=always
-ExecStart=%h/.cargo/bin/tv-power service ${MAC} ${ADDR}
-
-# These should be overriden. See the big comment above.
-Environment=ADDR=192.168.x.y MAC=C0:E7:BF:XX:YY:ZZ
+ExecStart=%h/.cargo/bin/tv-power service
 
 [Install]
 WantedBy=graphical-session.target

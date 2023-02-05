@@ -9,6 +9,7 @@ clap = { version = "4.1.4", features = ["derive", "env"] }
 color-eyre = "0.6.2"
 crossbeam = { version = "0.8.2", features = ["crossbeam-channel"] }
 dbus = "0.9.7"
+dotenvy = "0.15.6"
 env_logger = "0.10.0"
 libsystemd = "0.6.0"
 log = "0.4.17"

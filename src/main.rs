@@ -1,4 +1,4 @@
-use std::{io::Write, net::SocketAddr, time::Duration};
+use std::{io::Write, net::SocketAddr, process, time::Duration};
 
 use clap::Parser;
 use color_eyre::Result;
@@ -13,12 +13,18 @@ use presence::{generated::SessionManagerPresenceStatusChanged, PresenceStatus};
 
 mod adb;
 mod cli;
+mod config;
 mod outputs;
 mod power;
 mod presence;
 
 fn main() -> Result<()> {
     init_logging()?;
+
+    if let Err(e) = config::apply_env_overrides() {
+        log::error!("{e:#}");
+        process::exit(2);
+    }
 
     let cmd = Command::parse();
     use Command::*;

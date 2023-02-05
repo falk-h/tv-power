@@ -1,6 +1,9 @@
-use std::net::{IpAddr, SocketAddr};
+use std::{
+    collections::HashSet,
+    net::{IpAddr, SocketAddr},
+};
 
-use clap::{Args, Parser};
+use clap::{Args, CommandFactory, Parser};
 use mac_address::MacAddress;
 
 /// TV power manager.
@@ -74,4 +77,25 @@ impl SockAddr {
     pub fn to_std(self) -> SocketAddr {
         SocketAddr::from((self.ip, self.port))
     }
+}
+
+impl Command {
+    pub fn env_vars() -> HashSet<String> {
+        env_vars_inner(&Self::command())
+    }
+}
+
+fn env_vars_inner(command: &clap::Command) -> HashSet<String> {
+    let mut envs: HashSet<_> = command
+        .get_arguments()
+        .into_iter()
+        .filter_map(|a| a.get_env())
+        .map(|e| e.to_os_string().into_string().unwrap())
+        .collect();
+
+    for subcommand in command.get_subcommands() {
+        envs.extend(env_vars_inner(subcommand));
+    }
+
+    envs
 }

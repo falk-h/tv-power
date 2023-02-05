@@ -1,7 +1,7 @@
 use std::{io::Write, net::SocketAddr, process, time::Duration};
 
 use clap::Parser;
-use color_eyre::Result;
+use color_eyre::{eyre, Result};
 use dbus::{blocking::LocalConnection, message::SignalArgs};
 use libsystemd::daemon::{self, NotifyState};
 use log::Level;
@@ -75,7 +75,7 @@ fn init_logging() -> Result<()> {
 }
 
 fn service(mac: MacAddress, addr: SocketAddr, output: Option<String>) -> Result<()> {
-    let dbus = LocalConnection::new_session()?;
+    let dbus = connect_dbus()?;
     let power_manager = PowerManager::new(mac, addr, &dbus, output)?;
     let match_rule = SessionManagerPresenceStatusChanged::match_rule(None, None);
 
@@ -103,4 +103,19 @@ fn service(mac: MacAddress, addr: SocketAddr, output: Option<String>) -> Result<
     loop {
         dbus.process(Duration::MAX)?;
     }
+}
+
+fn connect_dbus() -> Result<LocalConnection> {
+    log::trace!("Connecting to DBUS");
+    daemon::notify(false, &[NotifyState::Status("Waiting for DBUS".to_owned())])?;
+
+    let attempts = 30;
+    for attempt in 1..=attempts {
+        match LocalConnection::new_session() {
+            Ok(dbus) => return Ok(dbus),
+            Err(e) => log::warn!("Failed to connect to DBUS: {e} (attempt {attempt}/{attempts})"),
+        }
+    }
+
+    eyre::bail!("Failed to connect to DBUS after {attempts} attempts")
 }
